@@ -1,63 +1,113 @@
-import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
-from dotenv import load_dotenv
+from fastapi import FastAPI, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
-'''
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase
-
-DATABASE_URL = "sqlite:///./app.db"  # archivo SQLite local
-
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False}  # requerido por SQLite
+from app.database import get_db
+from app import crud
+from app.schemas import (
+    PatineteCreate,
+    PatineteUpdate,
+    Patinete,
+    ZonaCreate,
+    Zona
 )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+app = FastAPI(
+    title="ScooterFlow API",
+    version="1.0.0",
+    description="API para gestión de patinetes eléctricos"
+)
 
-class Base(DeclarativeBase):
-    pass
+# -----------------------------
+# ROOT
+# -----------------------------
 
-# Dependencia de FastAPI para inyectar la sesión
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-'''
+@app.get("/")
+def read_root():
+    return {"message": "App ScooterFlow-API v1.0"}
 
 
-# 1. Obtener la URL de la base de datos desde una variable de entorno
-# En Render, ellos te dan esta URL.
-# En local, puedes poner una por defecto o usar un archivo .env
-# Obtenemos la URL de la variable de entorno
-load_dotenv()
+# -----------------------------
+# ZONAS
+# -----------------------------
 
-uri = os.getenv('DATABASE_URL')
+@app.get("/zonas", response_model=list[Zona])
+def listar_zonas(db: Session = Depends(get_db)):
+    return crud.get_zonas(db)
 
-# FIX: SQLAlchemy requiere "postgresql://" en lugar de "postgres://"
-if uri and uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
 
-DATABASE_URL = uri
+@app.get("/zonas/{zona_id}", response_model=Zona)
+def obtener_zona(zona_id: int, db: Session = Depends(get_db)):
+    zona = crud.get_zona(db, zona_id)
+    if not zona:
+        raise HTTPException(status_code=404, detail="Zona no encontrada")
+    return zona
 
-# 2. Configuración del Engine
-# Nota: Eliminamos 'connect_args' porque era específico para SQLite
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
-# 3. Sesión local
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+@app.post("/zonas", response_model=Zona, status_code=status.HTTP_201_CREATED)
+def crear_zona(data: ZonaCreate, db: Session = Depends(get_db)):
+    return crud.create_zona(db, data)
 
-# 4. Clase Base para los modelos
-class Base(DeclarativeBase):
-    pass
 
-# 5. Dependencia para inyectar la sesión en los endpoints
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@app.delete("/zonas/{zona_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_zona(zona_id: int, db: Session = Depends(get_db)):
+    zona = crud.delete_zona(db, zona_id)
+    if not zona:
+        raise HTTPException(status_code=404, detail="Zona no encontrada")
+    return
+
+
+# -----------------------------
+# PATINETES
+# -----------------------------
+
+@app.get("/patinetes", response_model=list[Patinete])
+def listar_patinetes(db: Session = Depends(get_db)):
+    return crud.get_patinetes(db)
+
+
+@app.get("/patinetes/{patinete_id}", response_model=Patinete)
+def obtener_patinete(patinete_id: int, db: Session = Depends(get_db)):
+    patinete = crud.get_patinete(db, patinete_id)
+    if not patinete:
+        raise HTTPException(status_code=404, detail="Patinete no encontrado")
+    return patinete
+
+
+@app.post("/patinetes", response_model=Patinete, status_code=status.HTTP_201_CREATED)
+def crear_patinete(data: PatineteCreate, db: Session = Depends(get_db)):
+    return crud.create_patinete(db, data)
+
+
+@app.put("/patinetes/{patinete_id}", response_model=Patinete)
+def actualizar_patinete(
+    patinete_id: int,
+    data: PatineteUpdate,
+    db: Session = Depends(get_db)
+):
+    patinete = crud.update_patinete(db, patinete_id, data)
+    if not patinete:
+        raise HTTPException(status_code=404, detail="Patinete no encontrado")
+    return patinete
+
+
+@app.delete("/patinetes/{patinete_id}", status_code=status.HTTP_204_NO_CONTENT)
+def eliminar_patinete(patinete_id: int, db: Session = Depends(get_db)):
+    patinete = crud.delete_patinete(db, patinete_id)
+    if not patinete:
+        raise HTTPException(status_code=404, detail="Patinete no encontrado")
+    return
+
+
+# -----------------------------
+# ENDPOINT ESPECIAL (TAREA)
+# -----------------------------
+
+@app.post("/zonas/{zona_id}/mantenimiento")
+def scooters_a_mantenimiento(zona_id: int, db: Session = Depends(get_db)):
+
+    actualizados = crud.patinetes_a_mantenimiento(db, zona_id)
+
+    return {
+        "zona": zona_id,
+        "patinetes_actualizados": actualizados
+    }
