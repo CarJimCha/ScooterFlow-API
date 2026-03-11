@@ -45,7 +45,7 @@ DATABASE_URL = uri
 
 # 2. Configuración del Engine
 # Nota: Eliminamos 'connect_args' porque era específico para SQLite
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
 # 3. Sesión local
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

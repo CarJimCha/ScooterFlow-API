@@ -1,17 +1,50 @@
-from pydantic import Field, BaseModel, ConfigDict # Importa ConfigDict
+from pydantic import BaseModel, Field
+from typing import Optional
 
-class ProductoBase(BaseModel):
-    descripcion: str = Field(min_length=3, max_length=100)
-    precio: float = Field(gt=0, description="El precio debe ser mayor que cero")
 
-# Para crear un producto
-class ProductoCreate(ProductoBase):
+# ---------- ZONA ----------
+
+class ZonaBase(BaseModel):
+    nombre: str
+    codigo_postal: str
+    limite_velocidad: int
+
+
+class ZonaCreate(ZonaBase):
     pass
 
-class ProductoUpdate(ProductoBase):
+
+class Zona(ZonaBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+# ---------- PATINETE ----------
+
+class PatineteBase(BaseModel):
+    numero_serie: str
+    modelo: str
+    bateria: int = Field(..., ge=0, le=100)
+    estado: str
+    zona_id: int
+
+
+class PatineteCreate(PatineteBase):
     pass
 
-class ProductoOut(ProductoBase):
-    codigo: int
-    # Esto es vital para que Pydantic entienda a SQLAlchemy
-    model_config = ConfigDict(from_attributes=True) # Nueva forma
+
+class PatineteUpdate(BaseModel):
+    modelo: Optional[str] = None
+    bateria: Optional[int] = Field(None, ge=0, le=100)
+    estado: Optional[str] = None
+    zona_id: Optional[int] = None
+
+
+class Patinete(PatineteBase):
+    id: int
+    puntuacion_usuario: Optional[float] = None
+
+    class Config:
+        from_attributes = True

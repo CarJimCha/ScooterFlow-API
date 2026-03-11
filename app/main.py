@@ -1,42 +1,63 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from app.database import Base, engine, get_db
-from app import crud
-from app.schemas import ProductoCreate, ProductoUpdate, ProductoOut
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
+from dotenv import load_dotenv
 
-# Esto crea las tablas si no existen
-Base.metadata.create_all(bind=engine)
-app = FastAPI(title="FastAPI + SQLite", version="1.0.0")
+'''
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-@app.get("/productos", response_model=list[ProductoOut])
-def listar_productos(db: Session = Depends(get_db)):
-    return crud.get_productos(db)
+DATABASE_URL = "sqlite:///./app.db"  # archivo SQLite local
 
-@app.get("/productos/{codigo}", response_model=ProductoOut)
-def obtener_producto(codigo: int, db: Session = Depends(get_db)):
-    prod = crud.get_producto(db, codigo)
-    if not prod:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
-    return prod
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False}  # requerido por SQLite
+)
 
-@app.post("/productos", response_model=ProductoOut, status_code=status.HTTP_201_CREATED)
-def crear_producto(data: ProductoCreate, db: Session = Depends(get_db)):
-    return crud.create_producto(db, data)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-@app.put("/productos/{codigo}", response_model=ProductoOut)
-def actualizar_producto(codigo: int, data: ProductoUpdate, db: Session = Depends(get_db)):
-    prod = crud.update_producto(db, codigo, data)
-    if not prod:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
-    return prod
+class Base(DeclarativeBase):
+    pass
 
-@app.delete("/productos/{codigo}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_producto(codigo: int, db: Session = Depends(get_db)):
-    prod = crud.delete_producto(db, codigo)
-    if not prod:
-        raise HTTPException(status_code=404, detail="Producto no encontrado")
-    return
+# Dependencia de FastAPI para inyectar la sesión
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+'''
 
-@app.get("/")
-def read_root():
-    return {"message": "App API_DevOps v1.0"}
+
+# 1. Obtener la URL de la base de datos desde una variable de entorno
+# En Render, ellos te dan esta URL.
+# En local, puedes poner una por defecto o usar un archivo .env
+# Obtenemos la URL de la variable de entorno
+load_dotenv()
+
+uri = os.getenv('DATABASE_URL')
+
+# FIX: SQLAlchemy requiere "postgresql://" en lugar de "postgres://"
+if uri and uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+
+DATABASE_URL = uri
+
+# 2. Configuración del Engine
+# Nota: Eliminamos 'connect_args' porque era específico para SQLite
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+
+# 3. Sesión local
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# 4. Clase Base para los modelos
+class Base(DeclarativeBase):
+    pass
+
+# 5. Dependencia para inyectar la sesión en los endpoints
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
