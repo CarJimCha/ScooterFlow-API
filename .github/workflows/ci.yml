@@ -15,9 +15,9 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_USER: salva
-          POSTGRES_PASSWORD: salva
-          POSTGRES_DB: productos
+          POSTGRES_USER: carlos
+          POSTGRES_PASSWORD: carlos
+          POSTGRES_DB: scooterflow
         ports:
           - 5432:5432
         options: >-
@@ -43,7 +43,7 @@ jobs:
       - name: Ejecutar Tests
         env:
           # Le decimos a los tests dónde está la DB de GitHub
-          DATABASE_URL: postgresql://salva:salva@localhost:5432/productos
+          DATABASE_URL: postgresql://carlos:carlos@localhost:5432/scooterflow
         run: |
           # Usamos PYTHONPATH=. para que encuentre la carpeta 'app'
           export PYTHONPATH=$PYTHONPATH:.
