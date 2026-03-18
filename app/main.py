@@ -99,13 +99,13 @@ def eliminar_patinete(patinete_id: int, db: Session = Depends(get_db)):
 
 
 # -----------------------------
-# ENDPOINT ESPECIAL (TAREA)
+# ENDPOINT ESPECIAL
 # -----------------------------
 
 @app.post("/zonas/{zona_id}/mantenimiento")
-def scooters_a_mantenimiento(zona_id: int, db: Session = Depends(get_db)):
+def patinetes_a_mantenimiento(zona_id: int, db: Session = Depends(get_db)):
 
-    actualizados = crud.patinetes_a_mantenimiento(db, zona_id)
+    actualizados = crud.enviar_a_mantenimiento(db, zona_id)
 
     return {
         "zona": zona_id,

@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
+from app.models import EstadoPatinete
 
 
 # ---------- ZONA ----------
@@ -27,7 +28,7 @@ class PatineteBase(BaseModel):
     numero_serie: str
     modelo: str
     bateria: int = Field(..., ge=0, le=100)
-    estado: str
+    estado: EstadoPatinete
     zona_id: int
 
 
@@ -38,7 +39,7 @@ class PatineteCreate(PatineteBase):
 class PatineteUpdate(BaseModel):
     modelo: Optional[str] = None
     bateria: Optional[int] = Field(None, ge=0, le=100)
-    estado: Optional[str] = None
+    estado: Optional[EstadoPatinete] = None
     zona_id: Optional[int] = None
 
 
@@ -48,3 +49,4 @@ class Patinete(PatineteBase):
 
     class Config:
         from_attributes = True
+        use_enum_values = True
