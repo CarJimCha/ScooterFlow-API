@@ -108,5 +108,5 @@ def patinetes_a_mantenimiento(zona_id: int, db: Session = Depends(get_db)):
     actualizados = crud.enviar_a_mantenimiento(db, zona_id)
 
     return {
-        "cantidad": actualizados
+        "cantidad": len(actualizados)
     }
