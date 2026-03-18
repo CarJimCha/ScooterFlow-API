@@ -23,7 +23,7 @@ app = FastAPI(
 
 @app.get("/")
 def read_root():
-    return {"message": "App ScooterFlow-API v1.0"}
+    return {"message": "App ScooterFlow-API v3.0"}
 
 
 # -----------------------------
