@@ -8,7 +8,7 @@ def test_crear_zona(client):
         "limite_velocidad": 25
     })
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["nombre"] == "Centro"
     assert "id" in data
@@ -31,7 +31,7 @@ def test_crear_patinete(client):
         "zona_id": zona["id"]
     })
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["zona_id"] == zona["id"]
 
@@ -82,7 +82,7 @@ def test_mantenimiento(client):
 
     response = client.post(f"/zonas/{zona['id']}/mantenimiento")
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["cantidad"] == 1
 
@@ -108,5 +108,5 @@ def test_estado_cambia_a_mantenimiento(client):
     # Aquí necesitarías endpoint GET /patinetes/{id}
     response = client.get(f"/patinetes/{patinete['id']}")
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert response.json()["estado"] == "mantenimiento"
