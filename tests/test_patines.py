@@ -10,7 +10,7 @@ def test_crear_zona(client):
         "limite_velocidad": 25
     })
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["nombre"] == "Centro"
     assert "id" in data
@@ -33,7 +33,7 @@ def test_crear_patinete(client):
         "zona_id": zona["id"]
     })
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["zona_id"] == zona["id"]
 
