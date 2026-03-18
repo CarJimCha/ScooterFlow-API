@@ -29,6 +29,8 @@ USER myuser
 
 # 7. Copiar el resto del código
 COPY ./app ./app
+COPY alembic.ini .
+COPY migrations ./migrations
 
 # 8. Exponer el puerto (FastAPI suele usar el 8000)
 EXPOSE 8000
