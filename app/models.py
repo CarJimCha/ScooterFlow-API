@@ -16,7 +16,7 @@ class Zona(Base):
     patinetes = relationship("Patinete", back_populates="zona")
 
 # Enum de Estados
-class EstadoScooter(str, enum.Enum):
+class EstadoPatinete(str, enum.Enum):
     disponible = "disponible"
     en_uso = "en_uso"
     mantenimiento = "mantenimiento"
@@ -31,7 +31,7 @@ class Patinete(Base):
     numero_serie = Column(String)
     modelo = Column(String)
     bateria = Column(Integer)
-    estado = Column(Enum(EstadoScooter))
+    estado = Column(Enum(EstadoPatinete))
 
     zona_id = Column(Integer, ForeignKey("zonas.id"))
 
