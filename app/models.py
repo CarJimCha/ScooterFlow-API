@@ -32,6 +32,7 @@ class Patinete(Base):
     modelo = Column(String)
     bateria = Column(Integer)
     estado = Column(Enum(EstadoPatinete))
+    puntuacion_usuario = Column(Float)
 
     zona_id = Column(Integer, ForeignKey("zonas.id"))
 
