@@ -1,11 +1,12 @@
 
-# API de Productos - DevOps Starter
+# ScooterFlow API
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
+![Alembic](https://img.shields.io/badge/Alembic-SQLAlchemy%20Migrations-red?style=for-the-badge)
 
 ---
 ## Introducción
@@ -20,17 +21,25 @@ Pero lo más importante es la automatización: incluimos tests que **GitHub Acti
 
 ```text
 proyecto_final/
+├── .github/workflows/  # Automatización (CI/CD) con GitHub Actions
 ├── app/                # Todo el código de la API (FastAPI)
-│   ├── main.py         # Punto de entrada
+│   ├── crud.py         # Definimos las funciones de los CRUD
 │   ├── database.py     # Configuración de SQLAlchemy
+│   ├── main.py         # Punto de entrada
 │   ├── models.py       # Tablas de la Base de Datos
 │   └── schemas.py      # Validación con Pydantic
+├── migrations          # Todo lo relacionado con las migraciones de Alembic
+│   ├── versons/        # Donde guardamos las migraciones concretas
+│   └── env.py          # Entorno y funciones de ejecución de migraciones
 ├── tests/              # Pruebas unitarias e integración
-├── .github/workflows/  # Automatización (CI/CD) con GitHub Actions
-├── Dockerfile          # Receta de la imagen de la API
+├── .dockerignore       # Recopilación de los archivos excluidos en Docker
+├── .gitignore          # Recopilación de los archivos excluidos en Git
+├── .env                # Variables de entorno (No subir a GitHub)
+├── alembic.ini         # Archivo de configuración de Alembic
 ├── docker-compose.yml  # Orquestador de servicios (API + DB)
-├── requirements.txt    # Librerías necesarias
-└── .env                # Variables de entorno (No subir a GitHub)
+├── Dockerfile          # Receta de la imagen de la API
+├── README.md           # Archivo con la docomentación básica de la aplicación
+└── requirements.txt    # Archivo con las librerías necesarias
 ```
 ---
 ## Requisitos previos
@@ -44,11 +53,14 @@ Para poner esto en marcha necesitas:
 ---
 ## Inicio Rápido
 1. Clona el proyecto y ábrelo en PyCharm.
-
-2. Crea tu archivo de configuración:
-Crea un archivo .env en la raíz y añade tus credenciales (ejemplo):
 ```
-DATABASE_URL=postgresql://tu_usuario:tu_password@db:5432/productos
+git clone https://github.com/CarJimCha/ScooterFlow-API.git
+cd ScooterFlow-API
+```
+2. Crea tu archivo de configuración:
+Crea un archivo .env en la raíz y añade tus credenciales, que debería coincidir con las de docker-compose:
+```
+DATABASE_URL=postgresql+psycopg2://carlos:carlos@db:5432/scooterflow
 ```
 3. Levanta el sistema con Docker:
 Abre la terminal de PyCharm y ejecuta:
@@ -58,6 +70,10 @@ docker-compose up --build
 4. Prueba la API:
 Entra en http://localhost:8000/docs para ver el Swagger interactivo.
 ---
+5. Ejecutar migraciones (Alembic):
+```
+docker compose exec fastapi_app alembic upgrade head
+```
 ## Testing y Calidad
 Para ejecutar los tests manualmente dentro del contenedor:
 ```
@@ -95,4 +111,6 @@ Este proyecto está optimizado para trabajar con PyCharm:
 * **Docker & Compose**: Contenerización y orquestación.
 
 * **Pytest**: Pruebas automáticas.
+
+* **Alembic**: Creación y migraciones de la BD.
 
